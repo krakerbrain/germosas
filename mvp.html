@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Germosas - Portal MVP de Micropigmentación e Integración</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="mvp.css">
+    
+    <!-- jsPDF Library for client-side PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body class="mvp-body">
+
+    <!-- MVP Container -->
+    <div class="mvp-container">
+        
+        <!-- Header & Mode Switcher -->
+        <header class="mvp-header">
+            <div class="mvp-brand">
+                <img src="logo_germosas.png" alt="Germosas Studio">
+                <div>
+                    <h2 style="font-family: var(--font-heading); font-size: 1.3rem; margin: 0; line-height: 1.1;">Sistema Clínico Integrado</h2>
+                    <span class="mvp-title-badge">Demostración MVP ✦</span>
+                </div>
+            </div>
+            <div class="mvp-mode-selector">
+                <button id="btn-mode-client" class="mode-btn active" onclick="switchMode('client')">
+                    <span>📱</span> Vista Cliente (Web & Agenda)
+                </button>
+                <button id="btn-mode-staff" class="mode-btn" onclick="switchMode('staff')">
+                    <span>💻</span> Vista Personal / Panel de Cabina
+                </button>
+            </div>
+            <div>
+                <a href="index.html" class="btn btn-dark" style="padding: 8px 20px; font-size: 0.8rem;">Volver al Sitio</a>
+            </div>
+        </header>
+
+        <!-- VIEW: CLIENT FLOW (Pre-eval & Diagnosis Booking) -->
+        <main id="view-client" class="mvp-view active">
+            
+            <!-- Steps Progress indicator -->
+            <div class="steps-progress">
+                <div id="step-i-1" class="step-item active">
+                    <div class="step-number">1</div>
+                    <div class="step-label">Pre-Evaluación</div>
+                </div>
+                <div id="step-i-2" class="step-item">
+                    <div class="step-number">2</div>
+                    <div class="step-label">Agenda Cita Diagnóstico</div>
+                </div>
+                <div id="step-i-3" class="step-item">
+                    <div class="step-number">3</div>
+                    <div class="step-label">Datos Contacto</div>
+                </div>
+                <div id="step-i-4" class="step-item">
+                    <div class="step-number">4</div>
+                    <div class="step-label">Cita Confirmada</div>
+                </div>
+            </div>
+
+            <!-- STEP 1: PRE-EVALUATION QUESTIONNAIRE -->
+            <section id="step-card-1" class="step-content-card active">
+                <div class="step-title">Evaluación Médica Previa</div>
+                <p class="step-description">Para garantizar tu seguridad en el tratamiento de Micropigmentación, por favor completa este cuestionario de salud inteligente. Si calificas preliminarmente, podrás agendar tu Cita de Diagnóstico Presencial.</p>
+                
+                <div id="questionnaire-box">
+                    <div class="question-group" data-q="pregnancy">
+                        <span class="question-text">1. ¿Se encuentra actualmente embarazada o en período de lactancia?</span>
+                        <div class="question-options">
+                            <button class="opt-btn btn-yes" onclick="setAnswer('pregnancy', true)">SÍ</button>
+                            <button class="opt-btn btn-no" onclick="setAnswer('pregnancy', false)">NO</button>
+                        </div>
+                    </div>
+                    
+                    <div class="question-group" data-q="keloids">
+                        <span class="question-text">2. ¿Tiene tendencia a la cicatrización queloide o hipertrófica?</span>
+                        <div class="question-options">
+                            <button class="opt-btn btn-yes" onclick="setAnswer('keloids', true)">SÍ</button>
+                            <button class="opt-btn btn-no" onclick="setAnswer('keloids', false)">NO</button>
+                        </div>
+                    </div>
+
+                    <div class="question-group" data-q="skindisease">
+                        <span class="question-text">3. ¿Tiene alguna afección activa de la piel en la zona a tratar (herpes, dermatitis, eccema)?</span>
+                        <div class="question-options">
+                            <button class="opt-btn btn-yes" onclick="setAnswer('skindisease', true)">SÍ</button>
+                            <button class="opt-btn btn-no" onclick="setAnswer('skindisease', false)">NO</button>
+                        </div>
+                    </div>
+
+                    <div class="question-group" data-q="heartmeds">
+                        <span class="question-text">4. ¿Padece diabetes no controlada, hemofilia o problemas graves de coagulación?</span>
+                        <div class="question-options">
+                            <button class="opt-btn btn-yes" onclick="setAnswer('heartmeds', true)">SÍ</button>
+                            <button class="opt-btn btn-no" onclick="setAnswer('heartmeds', false)">NO</button>
+                        </div>
+                    </div>
+
+                    <div class="question-group" data-q="bloodthinners">
+                        <span class="question-text">5. ¿Está tomando medicamentos anticoagulantes, aspirinas diarias o inmunosupresores?</span>
+                        <div class="question-options">
+                            <button class="opt-btn btn-yes" onclick="setAnswer('bloodthinners', true)">SÍ</button>
+                            <button class="opt-btn btn-no" onclick="setAnswer('bloodthinners', false)">NO</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Evaluation Result Message -->
+                <div id="evaluation-result" class="validation-result">
+                    <!-- Dynamic message goes here -->
+                </div>
+
+                <div class="flow-nav">
+                    <div></div>
+                    <button id="btn-next-1" class="btn btn-dark" disabled onclick="goToStep(2)">Continuar al Agendamiento ➔</button>
+                </div>
+            </section>
+
+            <!-- STEP 2: MOCK CALENDAR (DIAGNOSIS INTERVIEW) -->
+            <section id="step-card-2" class="step-content-card">
+                <div class="step-title">Reservar Cita de Diagnóstico Presencial</div>
+                <p class="step-description">Agenda una cita presencial de 30 minutos en Germosas Studio. En esta cita evaluaremos tu piel en persona, realizaremos la prueba de diseño de visagismo y planificaremos tu micropigmentación.</p>
+                
+                <div class="grid-2">
+                    <!-- Calendar Panel -->
+                    <div class="calendar-wrapper">
+                        <div class="calendar-header">
+                            <span id="calendar-month-year">Junio 2026</span>
+                            <span style="font-size: 0.8rem; color: var(--accent-gold);">★ Cita Diagnóstica</span>
+                        </div>
+                        <div class="calendar-grid">
+                            <div class="calendar-day-name">LU</div>
+                            <div class="calendar-day-name">MA</div>
+                            <div class="calendar-day-name">MI</div>
+                            <div class="calendar-day-name">JU</div>
+                            <div class="calendar-day-name">VI</div>
+                            <div class="calendar-day-name">SA</div>
+                            <div class="calendar-day-name">DO</div>
+                            
+                            <div class="calendar-day" onclick="selectDate(1)">1</div>
+                            <div class="calendar-day" onclick="selectDate(2)">2</div>
+                            <div class="calendar-day disabled">3</div>
+                            <div class="calendar-day" onclick="selectDate(4)">4</div>
+                            <div class="calendar-day" onclick="selectDate(5)">5</div>
+                            <div class="calendar-day" onclick="selectDate(6)">6</div>
+                            <div class="calendar-day disabled">7</div>
+                            
+                            <div class="calendar-day" onclick="selectDate(8)">8</div>
+                            <div class="calendar-day" onclick="selectDate(9)">9</div>
+                            <div class="calendar-day" onclick="selectDate(10)">10</div>
+                            <div class="calendar-day" onclick="selectDate(11)">11</div>
+                            <div class="calendar-day" onclick="selectDate(12)">12</div>
+                            <div class="calendar-day" onclick="selectDate(13)">13</div>
+                            <div class="calendar-day disabled">14</div>
+                            
+                            <div class="calendar-day" onclick="selectDate(15)">15</div>
+                            <div class="calendar-day" onclick="selectDate(16)">16</div>
+                            <div class="calendar-day" onclick="selectDate(17)">17</div>
+                            <div class="calendar-day" onclick="selectDate(18)">18</div>
+                            <div class="calendar-day" onclick="selectDate(19)">19</div>
+                            <div class="calendar-day" onclick="selectDate(20)">20</div>
+                            <div class="calendar-day disabled">21</div>
+
+                            <div class="calendar-day" onclick="selectDate(22)">22</div>
+                            <div class="calendar-day" onclick="selectDate(23)">23</div>
+                            <div class="calendar-day" onclick="selectDate(24)">24</div>
+                            <div class="calendar-day" onclick="selectDate(25)">25</div>
+                            <div class="calendar-day" onclick="selectDate(26)">26</div>
+                            <div class="calendar-day" onclick="selectDate(27)">27</div>
+                            <div class="calendar-day disabled">28</div>
+
+                            <div class="calendar-day" onclick="selectDate(29)">29</div>
+                            <div class="calendar-day" onclick="selectDate(30)">30</div>
+                            <div class="calendar-day empty"></div>
+                            <div class="calendar-day empty"></div>
+                            <div class="calendar-day empty"></div>
+                            <div class="calendar-day empty"></div>
+                            <div class="calendar-day empty"></div>
+                        </div>
+                    </div>
+
+                    <!-- Time Slots Panel -->
+                    <div style="background: #FDFDFB; border: 1px solid #EAE8E2; border-radius: 12px; padding: 20px;">
+                        <h4 style="margin-top: 0; margin-bottom: 15px; font-weight: 600;">Horas Disponibles (Entrevistas)</h4>
+                        <div id="slots-container" class="time-slots">
+                            <div class="time-slot" onclick="selectTime('09:30 AM')">09:30 AM</div>
+                            <div class="time-slot" onclick="selectTime('11:00 AM')">11:00 AM</div>
+                            <div class="time-slot disabled">12:30 PM</div>
+                            <div class="time-slot" onclick="selectTime('03:30 PM')">03:30 PM</div>
+                            <div class="time-slot" onclick="selectTime('05:00 PM')">05:00 PM</div>
+                        </div>
+                        <div id="selection-summary" style="margin-top: 30px; font-size: 0.9rem; color: #5A514D; font-style: italic;">
+                            Ninguna fecha seleccionada.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flow-nav">
+                    <button class="btn btn-light" onclick="goToStep(1)">➔ Atrás</button>
+                    <button id="btn-next-2" class="btn btn-dark" disabled onclick="goToStep(3)">Continuar al Registro ➔</button>
+                </div>
+            </section>
+
+            <!-- STEP 3: CONTACT DATA -->
+            <section id="step-card-3" class="step-content-card">
+                <div class="step-title">Ingresa tus Datos de Contacto</div>
+                <p class="step-description">Completa tu información básica para registrar la cita de pre-evaluación presencial en Germosas Studio.</p>
+                
+                <div class="grid-2">
+                    <div>
+                        <div class="form-field">
+                            <label for="client-name">Nombre Completo</label>
+                            <input type="text" id="client-name" placeholder="Ej. Andrea Morales" value="Andrea Morales">
+                        </div>
+                        <div class="form-field">
+                            <label for="client-email">Correo Electrónico</label>
+                            <input type="email" id="client-email" placeholder="Ej. andrea@correo.com" value="andrea.morales@correo.com">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="form-field">
+                            <label for="client-phone">Teléfono / WhatsApp</label>
+                            <input type="tel" id="client-phone" placeholder="Ej. +56912345678" value="+56987654321">
+                        </div>
+                        <div class="form-field">
+                            <label for="client-rut">RUT o Cédula</label>
+                            <input type="text" id="client-rut" placeholder="Ej. 19.876.543-2" value="19.876.543-2">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flow-nav">
+                    <button class="btn btn-light" onclick="goToStep(2)">➔ Atrás</button>
+                    <button id="btn-next-3" class="btn btn-dark" onclick="submitClientFlow()">Confirmar Diagnóstico Presencial ➔</button>
+                </div>
+            </section>
+
+            <!-- STEP 4: INTERVIEW CONFIRMED -->
+            <section id="step-card-4" class="step-content-card">
+                <div style="text-align: center; padding: 20px 0;">
+                    <div style="font-size: 4.5rem; color: var(--success); margin-bottom: 20px;">✓</div>
+                    <div class="step-title">¡Entrevista de Diagnóstico Agendada!</div>
+                    <p class="step-description" style="max-width: 600px; margin: 0 auto 30px;">
+                        Tu cita de diagnóstico presencial en Germosas Studio ha sido reservada con éxito para el <strong id="summary-final-date">--</strong> a las <strong id="summary-final-time">--</strong>.
+                    </p>
+                    
+                    <div style="background: rgba(110, 142, 117, 0.08); border: 1px solid rgba(110, 142, 117, 0.3); border-radius: 12px; padding: 20px; max-width: 550px; margin: 0 auto 30px; text-align: left;">
+                        <h4 style="margin-top: 0; margin-bottom: 10px; font-weight: 600; color: #3B5240; display: flex; align-items: center; gap: 8px;">
+                            <span>⚡</span> Acciones Automatizadas en Segundo Plano:
+                        </h4>
+                        <ul style="font-size: 0.85rem; color: #4A5C4E; line-height: 1.6; padding-left: 20px; margin: 0;">
+                            <li><strong>Pre-Ficha Médica:</strong> Respuestas de pre-evaluación guardadas en la ficha del cliente en el portal de Germosas.</li>
+                            <li><strong>Notificación Email:</strong> Envío de confirmación de cita al correo <span id="summary-email" style="font-weight: 600;">cliente@correo.com</span>.</li>
+                            <li><strong>Siguiente Paso (Presencial):</strong> La especialista de Germosas revisará tus respuestas y en la cita presencial evaluará tu piel antes de habilitar el procedimiento de micropigmentación.</li>
+                        </ul>
+                    </div>
+
+                    <div style="display: flex; justify-content: center; gap: 15px;">
+                        <button class="btn btn-dark" onclick="switchMode('staff')">Ir al Panel de Cabina (Vista Personal) 💻</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- VIEW: GERMOSAS STAFF DASHBOARD (Cabina & Diagnóstico) -->
+        <main id="view-staff" class="mvp-view">
+            <div class="admin-grid">
+                
+                <!-- Sidebar: Clients List -->
+                <aside class="admin-sidebar">
+                    <div class="admin-menu-title">Citas de Evaluación</div>
+                    <ul id="staff-client-list" class="client-list">
+                        <!-- Standard mock list -->
+                        <li class="client-item" onclick="selectStaffClient('client-new')">
+                            <div>
+                                <div id="lbl-new-name" class="client-item-name">Andrea Morales (Tú)</div>
+                                <span style="font-size: 0.7rem; color: #8C7F79;">Cita de Diagnóstico</span>
+                            </div>
+                            <span id="badge-new-status" class="client-item-status status-pending">Diagnóstico</span>
+                        </li>
+                        <li class="client-item active" onclick="selectStaffClient('client-1')">
+                            <div>
+                                <div class="client-item-name">Carla Espinoza</div>
+                                <span style="font-size: 0.7rem; color: #8C7F79;">Procedimiento Hecho</span>
+                            </div>
+                            <span class="client-item-status status-completed">Completado</span>
+                        </li>
+                        <li class="client-item" onclick="selectStaffClient('client-2')">
+                            <div>
+                                <div class="client-item-name">María José Pinto</div>
+                                <span style="font-size: 0.7rem; color: #8C7F79;">En Observación</span>
+                            </div>
+                            <span class="client-item-status status-pending">Revisión</span>
+                        </li>
+                    </ul>
+                    
+                    <div style="margin-top: 30px; padding: 15px; background: #FDFDFB; border-radius: 8px; border: 1px solid #EAE8E2; font-size: 0.8rem;">
+                        <strong>Panel de Cabina:</strong> Selecciona una cliente para evaluar clínicamente en su entrevista presencial, habilitar su consentimiento y guardar su tratamiento.
+                    </div>
+                </aside>
+
+                <!-- Details Panel -->
+                <section class="admin-card">
+                    <!-- Client header -->
+                    <div class="admin-card-section">
+                        <div class="d-flex justify-between align-center">
+                            <div>
+                                <h2 id="staff-selected-name" style="font-family: var(--font-heading); font-size: 2rem; margin: 0;">Carla Espinoza</h2>
+                                <p style="color: #7A706B; margin: 5px 0 0; font-size: 0.9rem;">
+                                    RUT: <span id="staff-selected-rut">15.432.876-K</span> | Cita: <span id="staff-selected-date">8 de Junio, 2026 - 10:00 AM</span>
+                                </p>
+                            </div>
+                            <div>
+                                <span id="staff-selected-status-badge" class="badge badge-success">Completado</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Client Pre-Evaluation Summary -->
+                    <div class="admin-card-section" style="background: #FDFDFB; border: 1px solid #EAE8E2; border-radius: 8px; padding: 20px;">
+                        <h4 style="margin-top:0; margin-bottom:10px; font-weight:600; display:flex; align-items:center; gap:8px;">
+                            <span>📱</span> Resultados de Pre-Evaluación Médica (Online)
+                        </h4>
+                        <div class="grid-2" style="font-size: 0.85rem; line-height: 1.6; color: #5A514D;">
+                            <div>
+                                <strong>¿Embarazo/Lactancia?:</strong> <span id="lbl-eval-pregnancy">NO</span><br>
+                                <strong>¿Cicatrización Queloides?:</strong> <span id="lbl-eval-keloids">NO</span><br>
+                                <strong>¿Afección piel en zona?:</strong> <span id="lbl-eval-skindisease">NO</span>
+                            </div>
+                            <div>
+                                <strong>¿Problemas Coagulación?:</strong> <span id="lbl-eval-heartmeds">NO</span><br>
+                                <strong>¿Medicamentos Anticoagulantes?:</strong> <span id="lbl-eval-bloodthinners">NO</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 1: ENTREVISTA DIAGNÓSTICA (PRESENCIAL) -->
+                    <div class="admin-card-section">
+                        <h3 class="admin-section-title"><span>🤝</span> Ficha de Evaluación Diagnóstica (Entrevista Presencial)</h3>
+                        <p style="font-size: 0.85rem; color: #7A706B; margin-bottom: 20px;">Completado por el profesional en cabina durante la entrevista de diagnóstico.</p>
+                        
+                        <div class="clinical-grid">
+                            <div class="form-field">
+                                <label for="diag-prev-work">¿Micropigmentación Previa?</label>
+                                <select id="diag-prev-work" onchange="updateDiagnosticLogic()">
+                                    <option value="No" selected>No tiene trabajos anteriores</option>
+                                    <option value="Si-Desvanecido">Sí (Muy desvanecido / Apto)</option>
+                                    <option value="Si-Oscuro">Sí (Muy oscuro / Requiere remoción láser)</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label for="diag-skin-type">Tipo de Piel</label>
+                                <select id="diag-skin-type">
+                                    <option value="Normal">Normal o Seca</option>
+                                    <option value="Grasa">Grasa / Poros dilatados</option>
+                                    <option value="Mixta" selected>Mixta</option>
+                                    <option value="Sensible">Sensible / Rosácea</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label for="diag-allergy">Prueba de Alergia a Pigmento</label>
+                                <select id="diag-allergy" onchange="updateDiagnosticLogic()">
+                                    <option value="Realizado-Negativo" selected>Realizado - Negativo (Apta)</option>
+                                    <option value="Pendiente">Pendiente (Dejar en observación 24h)</option>
+                                    <option value="No-Requiere">No requiere (Antecedentes limpios)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="clinical-grid">
+                            <div class="form-field">
+                                <label for="diag-density">Densidad del Vello Natural</label>
+                                <select id="diag-density">
+                                    <option value="Bajo">Baja (Poco vello)</option>
+                                    <option value="Medio" selected>Media</option>
+                                    <option value="Alto">Alta (Tupida)</option>
+                                </select>
+                            </div>
+                            <div class="form-field" style="grid-column: span 2;">
+                                <label for="diag-visagism">Diseño y Simetría (Prueba de Lápiz)</label>
+                                <select id="diag-visagism" onchange="updateDiagnosticLogic()">
+                                    <option value="Aprobado" selected>Aprobado y del agrado de la cliente</option>
+                                    <option value="Ajustes">Requiere ajustes adicionales en diseño</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Diagnostic Approval Selection -->
+                        <div style="background: #F4F2EE; padding: 20px; border-radius: 8px; margin-top: 15px; border: 1px solid rgba(43, 38, 36, 0.1);">
+                            <div class="d-flex justify-between align-center">
+                                <div>
+                                    <h5 style="margin: 0; font-size: 0.95rem; font-weight: 600;">Habilitación para Procedimiento Estético</h5>
+                                    <p style="margin: 5px 0 0; font-size: 0.8rem; color: #7A706B;">¿Es apto para iniciar el tratamiento de Micropigmentación tras evaluar en persona?</p>
+                                </div>
+                                <div>
+                                    <select id="diag-approval" style="width: 200px; font-weight: 600;" onchange="toggleTreatmentSections()">
+                                        <option value="Aprobado" selected>APTO / APROBADO</option>
+                                        <option value="Rechazado">NO APTO / RECHAZADO</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 2: CONSENTIMIENTO Y FIRMA DIGITAL (VISIBLE ONLY IF APPROVED) -->
+                    <div id="section-consent-signature" class="admin-card-section">
+                        <h3 class="admin-section-title"><span>✍</span> Consentimiento Legal y Firma Digital</h3>
+                        <p style="font-size: 0.85rem; color: #7A706B; margin-bottom: 20px;">Gire la tablet hacia la cliente para que lea el consentimiento legal y firme en pantalla.</p>
+                        
+                        <div class="signature-container" style="background: #FDFDFB; border: 1px solid #EAE8E2; padding: 20px; border-radius: 8px;">
+                            <p style="font-size: 0.8rem; color: #4A403C; line-height: 1.5; margin-bottom: 15px; height: 100px; overflow-y: scroll; border: 1px solid #EAE8E2; padding: 10px; background: #FFF;">
+                                <strong>DECLARACIÓN DE CONSENTIMIENTO INFORMADO:</strong><br>
+                                Entiendo que la micropigmentación es un procedimiento estético invasivo semipermanente. He sido informada de que el tono de pigmento inicial se atenuará entre un 30% y 50% durante las primeras dos semanas. Consiento en seguir los cuidados de cicatrización indicados en Germosas Studio (higiene y humectación). Declaro que he provisto información fidedigna sobre mi salud y no poseo contraindicaciones que invaliden este proceso.
+                            </p>
+                            <div class="signature-pad-wrapper" style="background: #FFFFFF;">
+                                <canvas id="signature-pad" class="signature-canvas"></canvas>
+                            </div>
+                            <div class="signature-controls">
+                                <button class="btn btn-light" style="padding: 6px 15px; font-size: 0.8rem;" onclick="clearSignature()">Limpiar Firma</button>
+                                <span style="font-size: 0.8rem; color: #8C7F79;">Capture la firma tocando la pantalla</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 3: FICHA TÉCNICA DE APLICACIÓN (VISIBLE ONLY IF APPROVED) -->
+                    <div id="section-treatment-specs" class="admin-card-section">
+                        <h3 class="admin-section-title"><span>📋</span> Ficha Técnica del Procedimiento</h3>
+                        
+                        <div class="clinical-grid">
+                            <div class="form-field">
+                                <label for="tech-area">Zona de Tratamiento</label>
+                                <select id="tech-area">
+                                    <option value="Cejas">Cejas (Microblading / Shading)</option>
+                                    <option value="Labios">Labios (Acuarela Lips / Micropigmentación)</option>
+                                    <option value="Ojos">Ojos (Classic Eyeliner)</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label for="tech-phototype">Fototipo de Piel (Fitzpatrick)</label>
+                                <select id="tech-phototype">
+                                    <option value="I">Fototipo I (Muy blanca)</option>
+                                    <option value="II" selected>Fototipo II (Blanca)</option>
+                                    <option value="III">Fototipo III (Media/Blanca-latina)</option>
+                                    <option value="IV">Fototipo IV (Oscura/Morena)</option>
+                                    <option value="V">Fototipo V (Muy oscura)</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label for="tech-pigment">Tono y Marca de Pigmento</label>
+                                <input type="text" id="tech-pigment" placeholder="Ej. Golden Brown #4 + Dark Brown" value="Golden Brown #4">
+                            </div>
+                        </div>
+
+                        <div class="clinical-grid">
+                            <div class="form-field">
+                                <label for="tech-needle">Tipo de Aguja Utilizada</label>
+                                <select id="tech-needle">
+                                    <option value="1R 0.3mm">1R 0.3mm (Delineado preciso)</option>
+                                    <option value="3RL" selected>3RL (Sombreado y relleno)</option>
+                                    <option value="5RS">5RS (Efecto polvo)</option>
+                                    <option value="Micro-Blade 18U">Micro-Blade 18U (Pelo a pelo)</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label for="tech-anesthesia">Anestesia Utilizada</label>
+                                <input type="text" id="tech-anesthesia" value="Lidocaína 5% tópica en crema">
+                            </div>
+                            <div class="form-field">
+                                <label for="tech-date">Fecha de Procedimiento</label>
+                                <input type="date" id="tech-date" value="2026-06-08">
+                            </div>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="tech-notes">Observaciones Clínicas / Notas de Cabina</label>
+                            <textarea id="tech-notes" rows="2" placeholder="Observaciones de cicatrización previa, asimetrías corregidas, etc.">Sin contraindicaciones durante el procedimiento. Se indica lavado suave y crema regeneradora cada 8 horas.</textarea>
+                        </div>
+                        
+                        <div class="d-flex justify-between align-center mt-20">
+                            <div>
+                                <button class="btn btn-dark" onclick="saveTechnicalCard()">Guardar Ficha y Finalizar Cita 💾</button>
+                                <button class="btn btn-light" style="border: 1px solid #CFCAC4;" onclick="generateAndDownloadPDF('staff')">Descargar PDF Historial 📄</button>
+                            </div>
+                            <span id="save-toast" style="color: var(--success); font-weight: 600; font-size: 0.9rem; opacity: 0; transition: opacity 0.3s;">¡Ficha guardada con éxito!</span>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 4: POST-SERVICE TOUCHUPS & ALERTS -->
+                    <div id="section-alerts" class="admin-card-section">
+                        <h3 class="admin-section-title"><span>⏳</span> Control de Retoques y Alertas Post-Servicio</h3>
+                        <p style="font-size: 0.85rem; color: #7A706B; margin-bottom: 20px;">
+                            El sistema automatiza el contacto para agendar la cita de retoque sugerida a los 30 días del tratamiento inicial. 
+                            <strong>Fecha de Retoque Sugerida:</strong> <span id="staff-touchup-date" style="font-weight: 600; color: var(--text-dark);">08 de Julio de 2026</span>
+                        </p>
+
+                        <!-- Alert Preview Layout -->
+                        <div class="alert-simulation-panel">
+                            
+                            <!-- WhatsApp Simulator -->
+                            <div class="alert-mock-box">
+                                <div class="mock-title">
+                                    <span style="color: #25D366; font-size: 1.2rem;">💬</span> WhatsApp de Retoque
+                                </div>
+                                <div class="whatsapp-mock">
+                                    <div class="whatsapp-bubble">
+                                        Hola, *<span class="mock-client-name">Carla</span>*. 🌟 Ha pasado un mes desde tu tratamiento de micropigmentación de cejas en *Germosas Studio*. Es momento de agendar tu retoque para perfeccionar el color y diseño. Agenda aquí: https://agendarium.com/germosas-retoque
+                                        <div class="whatsapp-time">10:00 AM</div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-mvp mt-3" style="width: 100%; font-size: 0.8rem; padding: 10px;" onclick="simulateAlert('whatsapp')">Simular Envío WhatsApp 📲</button>
+                            </div>
+
+                            <!-- Email Simulator -->
+                            <div class="alert-mock-box">
+                                <div class="mock-title">
+                                    <span style="color: #EA4335; font-size: 1.2rem;">✉️</span> Correo de Fidelización
+                                </div>
+                                <div class="email-mock">
+                                    <div class="email-header">
+                                        <div><strong>De:</strong> contacto@germosas.cl</div>
+                                        <div><strong>Para:</strong> <span id="mock-email-to">carla.esp@email.com</span></div>
+                                        <div><strong>Asunto:</strong> ¡Es hora de perfeccionar tu micropigmentación! ✨</div>
+                                    </div>
+                                    <div class="email-content">
+                                        <div style="text-align: center; margin-bottom: 10px;">
+                                            <img src="logo_germosas.png" style="height: 30px;" alt="Germosas">
+                                        </div>
+                                        <p>Hola <strong class="mock-client-name">Carla</strong>,</p>
+                                        <p>Queremos que tus cejas luzcan perfectas. Ya han transcurrido los 30 días de regeneración celular y es momento de tu retoque obligatorio para asegurar la durabilidad y tono óptimo del pigmento.</p>
+                                        <div style="text-align: center; margin: 15px 0;">
+                                            <a href="#" style="background:#2B2624; color:#FFF; padding:8px 16px; text-decoration:none; border-radius:20px; font-size: 0.8rem;">Agendar Retoque en Agendarium</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-dark mt-3" style="width: 100%; font-size: 0.8rem; padding: 10px;" onclick="simulateAlert('email')">Simular Envío Email ✉️</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="mvp.js"></script>
+</body>
+</html>
